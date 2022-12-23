@@ -1,0 +1,111 @@
+* {
+    box-sizing: border-box;
+    font-size: 12px;
+}
+
+html, body{
+    margin: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#container {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+}
+
+aside {
+    margin: 0;
+    position: fixed;
+    z-index: 10;
+    top: 0px;
+    left: 0px;
+    width: 390px;
+    height: 100%;
+
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.184);
+
+    background-color: white;
+}
+
+#map{
+    width: 100%;
+    height: 100%;
+}
+
+header{
+    padding: 20px 20px 2px;
+    height: 116px;
+    
+    background-color: #7C6CCB;
+}
+
+.menu{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin: 0;
+    padding: 0px 11px;
+    height: 5%;
+
+    background-color: #7C6CCB;
+    list-style-type: none;
+}
+
+.menu li{
+    padding: 12px 9px;
+}
+
+.mainmenutab{
+    display: inline-block;
+    padding: 4px 7px;
+
+    width: 68px;
+    height: 30px;
+
+    text-align: center;
+    color: white;
+    
+    text-decoration: none;
+}
+
+.tab-selectd{
+    border-radius: 5px;
+    background-color: #1467dd;
+    font-weight: 700;
+}
+.title {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    padding-top: 5px;
+
+    height: 48px;
+}
+.box_login{
+    height: 15%;
+    width: 350px;
+    border: 1px solid #1b5bc200;
+    background: #ffffff00;
+    }
+.room_info{
+    word-break:break-all;
+    height: 80%;
+    width: 390px;
+    border: 1px solid #1b5bc200;
+    background: #ffffff00;
+    }
+#loginId{
+    font-size: 16px;
+    width: 260px;
+    padding: 5px;
+    border: 0px;
+    outline: none;
+    float: left;
+}
+#searchbutton{
+    padding:5px 10px;
+}

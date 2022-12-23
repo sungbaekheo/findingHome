@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>쪽집게</title>
+    <link rel="icon" href="{% static 'images/logo.png' %}"> <!-- 상단바 아이콘 -->
+    <link rel="stylesheet" href="{% static 'css/map.css' %}">
+    <style>
+        .map_wrap, .map_wrap * {margin:0;padding:0;font-family:'Malgun Gothic',dotum,'돋움',sans-serif;font-size:12px;}
+        .map_wrap a, .map_wrap a:hover, .map_wrap a:active{color:#000;text-decoration: none;}
+        .map_wrap {position:relative;width:100%;height:500px;}
+        #menu_wrap {position:absolute;top:0;left:0;bottom:0;width:250px;margin:10px 0 30px 10px;padding:5px;overflow-y:auto;background:rgba(255, 255, 255, 0.7);z-index: 1;font-size:12px;border-radius: 10px;}
+        .bg_white {background:#fff;}
+        #menu_wrap hr {display: block; height: 1px;border: 0; border-top: 2px solid #5F5F5F;margin:3px 0;}
+        #menu_wrap .option{text-align: center;}
+        #menu_wrap .option p {margin:10px 0;}  
+        #menu_wrap .option button {margin-left:5px;}
+        #placesList li {list-style: none;}
+        #placesList .item {position:relative;border-bottom:1px solid #888;overflow: hidden;cursor: pointer;min-height: 65px;}
+        #placesList .item span {display: block;margin-top:4px;}
+        #placesList .item h5, #placesList .item .info {text-overflow: ellipsis;overflow: hidden;white-space: nowrap;}
+        #placesList .item .info{padding:10px 0 10px 55px;}
+        #placesList .info .gray {color:#8a8a8a;}
+        #placesList .info .jibun {padding-left:26px;background:url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/places_jibun.png) no-repeat;}
+        #placesList .info .tel {color:#009900;}
+        #placesList .item .markerbg {float:left;position:absolute;width:36px; height:37px;margin:10px 0 0 10px;background:url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png) no-repeat;}
+        #placesList .item .marker_1 {background-position: 0 -10px;}
+        #placesList .item .marker_2 {background-position: 0 -56px;}
+        #placesList .item .marker_3 {background-position: 0 -102px}
+        #placesList .item .marker_4 {background-position: 0 -148px;}
+        #placesList .item .marker_5 {background-position: 0 -194px;}
+        #placesList .item .marker_6 {background-position: 0 -240px;}
+        #placesList .item .marker_7 {background-position: 0 -286px;}
+        #placesList .item .marker_8 {background-position: 0 -332px;}
+        #placesList .item .marker_9 {background-position: 0 -378px;}
+        #placesList .item .marker_10 {background-position: 0 -423px;}
+        #placesList .item .marker_11 {background-position: 0 -470px;}
+        #placesList .item .marker_12 {background-position: 0 -516px;}
+        #placesList .item .marker_13 {background-position: 0 -562px;}
+        #placesList .item .marker_14 {background-position: 0 -608px;}
+        #placesList .item .marker_15 {background-position: 0 -654px;}
+        #pagination {margin:10px auto;text-align: center;}
+        #pagination a {display:inline-block;margin-right:10px;}
+        #pagination .on {font-weight: bold; cursor: default;color:#777;}
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <aside style="overflow-y:auto;">
+            <ul class="menu">
+                <li><a href="" class="mainmenutab tab-selectd">검색</a></li>
+                <li><a href="" class="mainmenutab">찜목록</a></li>
+                <li><a href="" class="mainmenutab">매물 정보</a></li>
+                <li><a href="" class="mainmenutab">커뮤니티</a></li>
+            </ul>
+            
+            <header>
+                <div class="check-location">
+                    <!-- <input type="checkbox" id="my-location"> -->
+                    <!-- <label for="my-location" class="my-location-label">현 지도 내 장소검색</label> -->
+                </div>
+                <div class="box_login">
+                    <div class="inp_text">        
+                        <form action="/rec/" method="GET">
+                        {% csrf_token %}
+                            <label for="userInput" class="screen_out"></label>
+                            <!-- <input type="email" id="loginId" name="loginId" placeholder="검색해주세요" > -->
+                            <input type="text" id="userInput" name="userInput" size=30 placeholder="검색어 입력"/>
+                            <input type="submit" value="매물 검색">
+                            <!-- <button>매물 검색<button> -->
+                        </form>
+                    </div>
+                </div>
+            </header>
+            <div class="room_info_box">
+                <script>
+                    
+                    var room = JSON.parse("{{roomInfo|escapejs}}")
+
+                    for(var i=0; i<room.url.length; i++) {
+                        document.write("<div style='overflow-y:hidden; width:390px; height:180px; cursor:pointer;' onclick=\"location.href=\'"+room['url'][i]+"\';\" >");
+                        document.write("<div class='left_box' style='float:left; width=30%;'><br><img id=\"img\" src='"+room['pic'][i]+ "?w=800&h=600&q=70&a=1" +"' width=\"150\" height=\"150\"></div>");
+                        document.write("<div class='right_box' style='margin-left=30%;'><h4>"+room['type'][i]+"</h4><p>"+room['detail'][i]+"</div></div>");
+                    }
+                </script>
+
+            </div>
+
+        </aside>
+        <div id="map"></div>
+    </div>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=a2920de0dd81f60dcf167059929f3750&libraries=services"></script>
+	
+    <script>
+        var markers = [];
+
+		var container = document.getElementById('map'); // var 변수명=값;
+		var options = {
+			center: new kakao.maps.LatLng(37.488245, 126.982718),
+			level: 1
+		};
+
+		var map = new kakao.maps.Map(container, options);
+
+        // 일반 지도와 스카이뷰로 지도 타입을 전환할 수 있는 지도타입 컨트롤을 생성합니다
+        var mapTypeControl = new kakao.maps.MapTypeControl();
+
+        // 지도에 컨트롤을 추가해야 지도위에 표시됩니다
+        // kakao.maps.ControlPosition은 컨트롤이 표시될 위치를 정의하는데 TOPRIGHT는 오른쪽 위를 의미합니다
+        map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
+
+        // 지도 확대 축소를 제어할 수 있는  줌 컨트롤을 생성합니다
+        var zoomControl = new kakao.maps.ZoomControl();
+        map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
+
+        // 검색 결과 목록이나 마커를 클릭했을 때 장소명을 표출할 인포윈도우를 생성합니다
+        var infowindow = new kakao.maps.InfoWindow({zIndex:1});
+
+        var roomInfo = JSON.parse("{{roomInfo|escapejs}}");
+
+        displayPlaces(roomInfo['lat'], roomInfo['lng'])
+
+        // 검색 결과 목록과 마커를 표출하는 함수입니다
+        function displayPlaces(lat, lng) {
+
+            var listEl = document.getElementById('placesList'), 
+            menuEl = document.getElementById('menu_wrap'),
+            fragment = document.createDocumentFragment(), 
+            bounds = new kakao.maps.LatLngBounds(), 
+            listStr = '';
+
+            // 지도에 표시되고 있는 마커를 제거합니다
+            removeMarker();
+
+            for ( var i=0; i<roomInfo.url.length; i++ ) {
+
+                // 마커를 생성하고 지도에 표시합니다
+                var placePosition = new kakao.maps.LatLng(lat[i], lng[i]),
+                    marker = addMarker(placePosition, i)
+                // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
+                // LatLngBounds 객체에 좌표를 추가합니다
+                bounds.extend(placePosition);
+
+                // 마커와 검색결과 항목에 mouseover 했을때
+                // 해당 장소에 인포윈도우에 장소명을 표시합니다
+                // mouseout 했을 때는 인포윈도우를 닫습니다
+                (function(marker, title, picture, detail) {
+                    kakao.maps.event.addListener(marker, 'mouseover', function() {
+                        displayInfowindow(marker, title, picture, detail);
+                    });
+
+                    kakao.maps.event.addListener(marker, 'mouseout', function() {
+                        infowindow.close();
+                    });
+                })(marker, '매물 아이디', roomInfo['pic'][i], roomInfo['detail'][i]);
+                (function(marker, url){
+                    kakao.maps.event.addListener(marker, 'click', function() {
+                        window.location.href =  url;
+                    });
+                })(marker, roomInfo['url'][i])
+            }
+
+            // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
+            map.setBounds(bounds);
+        }
+
+        // 마커를 생성하고 지도 위에 마커를 표시하는 함수입니다
+        function addMarker(position, idx) {
+            var imageSrc = "{% static 'images/marker.png' %}", // 마커 이미지 url,
+                imageSize = new kakao.maps.Size(36, 37),  // 마커 이미지의 크기
+                imgOptions =  {
+                    offset: new kakao.maps.Point(13, 37) // 마커 좌표에 일치시킬 이미지 내에서의 좌표
+                },
+                markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imgOptions),
+                    marker = new kakao.maps.Marker({
+                    position: position, // 마커의 위치
+                    clickable: true,
+                    image: markerImage 
+                });
+
+            marker.setMap(map); // 지도 위에 마커를 표출합니다
+            markers.push(marker);  // 배열에 생성된 마커를 추가합니다
+
+            return marker;
+        }
+        
+        // 지도 위에 표시되고 있는 마커를 모두 제거합니다
+        function removeMarker() {
+            for ( var i = 0; i < markers.length; i++ ) {
+                markers[i].setMap(null);
+            }   
+            markers = [];
+        }
+        // 검색결과 목록 또는 마커를 클릭했을 때 호출되는 함수입니다
+        // 인포윈도우에 장소명을 표시합니다
+        function displayInfowindow(marker, title, picture,detail) {
+            var content = '<div style="padding:2px;z-index:1; width:400px">'+'<p><div class="left_box" style="float:left; width=30%;"><img id="img" src='+picture+"?w=800&h=600&q=70&a=1"+' width="150" height="150"></div><h2>'+ title +'</h2>'+ detail +'</div>';
+            infowindow.setContent(content);
+            infowindow.open(map, marker);
+        }
+	</script>
+    
+</body>
+</html>
